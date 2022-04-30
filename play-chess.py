@@ -19,12 +19,14 @@ max_c = 3000
 min_c = -max_c
 mate_score = max_c
 
-stockfish_think_time = 0.2
-player_think_time = 0.2
+stockfish_think_time = 0.05
+player_think_time = 0.05
 
 import_game_url = "https://lichess.org/api/import"
 
 engine = chess.engine.SimpleEngine.popen_uci("/usr/games/stockfish")
+engine2 = chess.engine.SimpleEngine.popen_uci("/usr/games/komodo-13.02-linux")
+
 limit = chess.engine.Limit(time=stockfish_think_time)
 
 emoji_list = [
@@ -99,7 +101,7 @@ def get_emoji_from_evaluation(evaluation):
     elif value < -mate_score:
         return emoji_list[-1]
     else:
-        return emoji_list[map_range(value, min_c, max_c, 0, len(emoji_list))]
+        return emoji_list[map_range(value, min_c, max_c, 0, len(emoji_list)-1)]
 
 
 def get_move(prompt):
@@ -350,9 +352,9 @@ def play_game(basic_player, player2, visual="svg", pause=0.1):
             num_moves = len(board.move_stack)
 
             black_status = get_emoji_from_evaluation(
-                raw_valuation['score'].pov(chess.WHITE))
-            white_status = get_emoji_from_evaluation(
                 raw_valuation['score'].pov(chess.BLACK))
+            white_status = get_emoji_from_evaluation(
+                raw_valuation['score'].pov(chess.WHITE))
 
             html = create_html(num_moves, name, uci, evaluation,
                                black_status, board_stop, white_status, valuation_percent)
@@ -479,6 +481,17 @@ def engine_player(board):
     result = engine.play(board, limit)
     return result.move.uci()
 
+def engine_player_2(board):
+    """A player using a chess engine, eg. stockfish
+
+    Args:
+        board (chess.Board): the current chess board
+
+    Returns:
+        _type_: _description_
+    """
+    result = engine2.play(board, limit)
+    return result.move.uci()
 
 if __name__ == "__main__":
-    play_game(engine_player, basic_player, visual=None)
+    play_game(engine_player, engine_player_2, visual=None)
