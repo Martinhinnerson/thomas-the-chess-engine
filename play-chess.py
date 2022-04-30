@@ -28,19 +28,18 @@ engine = chess.engine.SimpleEngine.popen_uci("/usr/games/stockfish")
 limit = chess.engine.Limit(time=stockfish_think_time)
 
 emoji_list = [
-    "&#128561",
-    "&#128552",
-    "&#128546",
-    "&#128534",
-    "&#128533",
-    "&#128528",
-    "&#128578",
-    "&#128512",
-    "&#128513",
-    "&#128514",
-    "&#128526",
+    "&#128561",#😱
+    "&#128552",#😨
+    "&#128546",#😢
+    "&#128531",#😓
+    "&#128533",#😕
+    "&#128528",#😐
+    "&#128578",#🙂
+    "&#128512",#😀
+    "&#128513",#😁
+    "&#128514",#😂	
+    "&#128526",#😎
 ]
-
 
 def clamp(num, min_val, max_val):
     """Clamp a value to a range
@@ -55,6 +54,20 @@ def clamp(num, min_val, max_val):
     """
     return max(min(num, max_val), min_val)
 
+def map_range(value, min_in, max_in, min_out, max_out):
+    """Map a range to another range and round the result
+
+    Args:
+        value (_type_): _description_
+        min_in (_type_): _description_
+        max_in (_type_): _description_
+        min_out (_type_): _description_
+        max_out (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    return round(min_out + (((value - min_in) / (max_in - min_in)) * (max_out - min_out)))
 
 def to_percent(num, min_val, max_val):
     """Get the percent value based on a range
@@ -81,28 +94,12 @@ def get_emoji_from_evaluation(evaluation):
     """
     value = evaluation.score(mate_score=mate_score)
 
-    if value > 2000:
+    if value > mate_score:
         return emoji_list[0]
-    if value > 1000:
-        return emoji_list[1]
-    if value > 500:
-        return emoji_list[2]
-    if value > 200:
-        return emoji_list[3]
-    if value > 99:
-        return emoji_list[5]
-    elif value < -2000:
+    elif value < -mate_score:
         return emoji_list[-1]
-    elif value < -1000:
-        return emoji_list[-2]
-    elif value < -500:
-        return emoji_list[-3]
-    elif value < -200:
-        return emoji_list[-4]
-    elif value < -99:
-        return emoji_list[-5]
     else:
-        return emoji_list[5]
+        return emoji_list[map_range(value, min_c, max_c, 0, len(emoji_list))]
 
 
 def get_move(prompt):
